@@ -27,7 +27,7 @@ const isValid = (username)=>{ //returns boolean
       }
     }
 
-const authenticatedUser = = (username,password)=>{
+const authenticatedUser = (username,password)=>{
     let validusers = users.filter((user)=>{
       return (user.username === username && user.password === password)
     });
@@ -50,7 +50,7 @@ regd_users.post("/login", (req,res) => {
     if (authenticatedUser(username,password)) {
       let accessToken = jwt.sign({
         data: password
-      }, 'access', { expiresIn: 60 });
+      }, 'access', { expiresIn: 60 * 60 });
   
       req.session.authorization = {
         accessToken,username
@@ -63,10 +63,26 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const user = req.session.authorization.username;
+    const isbn = req.params.isbn;
+    if (isbn) {
+        const book = books[isbn];
+        if (book) {
+          const review = req.body.review;
+          if (review) {
+            const reviews = book["reviews"] || {};
+            reviews[user] = review;
+            books[isbn]["reviews"] = reviews;
+            const message = `Review added for user ${user}. Reviews are: ${JSON.stringify(reviews)}`;
+            return res.status(300).json({message: message});
+          }                   
+        }
+        return res.status(400).json({message: "No review for book with this ISBN found"});
+    }    
+    return res.status(400).json({message: "No ISBN for the book provided"});
 });
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
+
