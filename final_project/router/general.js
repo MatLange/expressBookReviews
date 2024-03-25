@@ -16,6 +16,11 @@ let allBooksPromise = new Promise((resolve,reject) => {
       resolve(books)
 },0)});
 
+const asyncBooks = async ()=>{
+    const req = await axios.get("bookstore.json");
+    return req.data;
+}
+
 public_users.post("/register", (req,res) => {
     const username = req.body.username;
     const password = req.body.password;
@@ -32,7 +37,7 @@ public_users.post("/register", (req,res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/', function (req, res) {
+public_users.get('/', async function (req, res) {
     allBooksPromise.then((bookdata) => {
         const message = JSON.stringify(bookdata, null, 4);
         return res.status(300).json(bookdata);

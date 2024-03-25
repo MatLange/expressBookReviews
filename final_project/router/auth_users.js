@@ -65,21 +65,24 @@ regd_users.post("/login", (req,res) => {
 regd_users.put("/auth/review/:isbn", (req, res) => {
     const user = req.session.authorization.username;
     const isbn = req.params.isbn;
-    if (isbn && user) {
+    if (!isbn) {
+        return res.status(400).json({message: "No ISBN for the book provided"});
+    }
+    const review = req.query.review;
+    if (review && user) {
         const book = books[isbn];
         if (book) {
-          const review = req.body.review;
           if (review) {
             const reviews = book["reviews"] || {};
             reviews[user] = review;
             books[isbn]["reviews"] = reviews;
-            const message = `Review added for user ${user}. Reviews are: ${JSON.stringify(reviews)}`;
-            return res.status(300).json({message: message});
+            const message = `Review for book with ISBN ${isbn} added/modified for user ${user}.`;
+            return res.status(300).json(message);
           }                   
         }
         return res.status(400).json({message: "No review for book with this ISBN found"});
     }    
-    return res.status(400).json({message: "No ISBN for the book provided"});
+    return res.status(400).json({message: "No review for the book provided"});
 });
 
 // Delete a book review
@@ -93,8 +96,8 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
             reviews[user] = null;
             delete reviews[user];
             books[isbn]["reviews"] = reviews;
-            const message = `Review deleted for user ${user}. Reviews are: ${JSON.stringify(reviews)}`;
-            return res.status(300).json({message: message});
+            const message = `Review for book with ISBN ${isbn} deleted for user ${user}.`;
+            return res.status(300).json(message);
         }
         return res.status(400).json({message: "No review for book with this ISBN found"});
     }    
