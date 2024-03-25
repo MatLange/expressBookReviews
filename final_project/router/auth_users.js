@@ -77,7 +77,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
             reviews[user] = review;
             books[isbn]["reviews"] = reviews;
             const message = `Review for book with ISBN ${isbn} added/modified for user ${user}.`;
-            return res.status(300).json(message);
+            return res.status(200).json(message);
           }                   
         }
         return res.status(400).json({message: "No review for book with this ISBN found"});
@@ -97,7 +97,7 @@ regd_users.delete("/auth/review/:isbn", (req, res) => {
             delete reviews[user];
             books[isbn]["reviews"] = reviews;
             const message = `Review for book with ISBN ${isbn} deleted for user ${user}.`;
-            return res.status(300).json(message);
+            return res.status(200).json(message);
         }
         return res.status(400).json({message: "No review for book with this ISBN found"});
     }    

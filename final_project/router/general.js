@@ -39,8 +39,9 @@ public_users.post("/register", (req,res) => {
 // Get the book list available in the shop
 public_users.get('/', async function (req, res) {
     allBooksPromise.then((bookdata) => {
-        const message = JSON.stringify(bookdata, null, 4);
-        return res.status(300).json(bookdata);
+        const books = {"books": bookdata};
+        const message = JSON.stringify(books, null, 4);
+        return res.status(200).json(books);
     },
     (err) => { return res.status(400).json({message:"Error reading the books"}); });
 });
@@ -52,7 +53,7 @@ public_users.get('/isbn/:isbn',function (req, res) {
         if (isbn) {
             const book = books[isbn];
             if (book) {
-                return res.status(300).json(book);
+                return res.status(200).json(book);
             }
             return res.status(400).json({message: "No book with this ISBN found"});
         }
@@ -68,13 +69,19 @@ public_users.get('/author/:author',function (req, res) {
         if (!author) {
             return res.status(400).json({message: "No valid author provided"});
         }
-        const filteredBooks = {};
+        const filteredBooks = [];
         Object.keys(books).forEach((key) => {
             if (books[key].author === author) {
-                filteredBooks[key] = books[key];
+                const authorBook = {
+                    "isbn": key,
+                    "title":books[key].title,
+                    "reviews":books[key].reviews
+                }
+                filteredBooks.push(authorBook);
             }
         });
-        return res.status(300).json(filteredBooks);
+        const booksbyAuthor = {"booksbyauthor": filteredBooks};        
+        return res.status(200).json(booksbyAuthor);
     },
     (err) => { return res.status(400).json({message:"Error reading the books"}); });        
 });
@@ -86,13 +93,19 @@ public_users.get('/title/:title',function (req, res) {
         if (!title) {
             return res.status(400).json({message: "No valid title provided"});
         }
-        const filteredBooks = {};
+        const filteredBooks = [];
         Object.keys(books).forEach((key) => {
             if (books[key].title === title) {
-                filteredBooks[key] = books[key];
+                const titleBook = {
+                    "isbn": key,
+                    "author":books[key].author,
+                    "reviews":books[key].reviews
+                }
+                filteredBooks.push(titleBook);
             }
         });
-        return res.status(300).json(filteredBooks);
+        const booksbyTitle = {"booksbytitle": filteredBooks};        
+        return res.status(200).json(booksbyTitle);
     },
     (err) => { return res.status(400).json({message:"Error reading the books"}); });            
 });
@@ -103,7 +116,7 @@ public_users.get('/review/:isbn',function (req, res) {
   if (isbn) {
       const book = books[isbn];
       if (book) {
-        return res.status(300).json(book["reviews"]);
+        return res.status(200).json(book["reviews"]);
       }
       return res.status(400).json({message: "No book with this ISBN found"});
   }    
